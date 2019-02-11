@@ -1,0 +1,79 @@
+
+- name: Install postgresql database
+  hosts: dbservers
+  remote_user: root
+  roles:
+    - role: install_postgresql
+
+- name: Install rabbitmq
+  hosts: rabbitmq
+  remote_user: root
+  roles:
+    - role: install_rabbitmq
+    
+- hosts: rabbitmq
+  remote_user: root
+  tasks:
+  - name: rabbitmqc add_user
+    command:  rabbitmqctl add_user {{ rabbitmq_user }} {{ rabbitmq_password }}
+    ignore_errors: true
+  - name: rabbitmq set_user_tags pod
+    command: rabbitmqctl set_user_tags {{ rabbitmq_user }} administrator
+    ignore_errors: true
+  - name: rabbitmq set_user_tags guest
+    command: rabbitmqctl set_user_tags guest
+    ignore_errors: true
+  - name: rabbitmq add_vhost
+    command: rabbitmqctl add_vhost {{ rabbitmq_vhost }}
+    ignore_errors: true
+  - name: rabbitmqctl set_permissions
+    command: rabbitmqctl set_permissions -p {{ rabbitmq_vhost }} {{ rabbitmq_user }} ".*" ".*" ".*"
+    ignore_errors: true
+
+- name: Install Java and elasticsearch
+  hosts: elasticsearch
+  remote_user: root
+  roles:
+    - role: install_java
+    - role: install_elasticsearch
+  
+- name: Install Pod | pip
+  hosts: webservers encodeservers
+  gather_facts: true
+  vars:
+    ansible_ssh_user: pod
+    ansible_ssh_private_key_file: '/home/pod/.ssh/id_rsa.pub'
+  tasks:
+    - include: './roles/pod_install/tasks/commun.yml'
+    - include: './roles/pod_install/tasks/settings.yml'
+    - include: './roles/pod_install/tasks/celeryd.yml'
+
+- name: Init db Pod 
+  hosts: webservers
+  gather_facts: true
+  vars:
+    ansible_ssh_user: pod
+    ansible_ssh_private_key_file: '/home/pod/.ssh/id_rsa.pub'
+  tasks:
+    - include: './roles/pod_install/tasks/init_base.yml'
+  tags:
+    - first_install
+
+- name: Install lib encode
+  hosts: encodeservers
+  remote_user: root
+  tasks:
+    - include: './roles/pod_install/tasks/lib_encode.yml'
+
+- name: Install nginx
+  hosts: webservers
+  remote_user: root
+  tasks:
+    - include: './roles/pod_install/tasks/nginx_uwsgi.yml'
+
+
+
+
+
+
+

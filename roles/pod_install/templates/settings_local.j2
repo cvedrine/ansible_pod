@@ -1,0 +1,44 @@
+from django.utils.translation import ugettext_lazy as _
+DATABASES = {
+    'default': {
+        'ENGINE': '{{ django_db_backends }}',
+        'NAME': '{{ db_name}}',
+        'USER': '{{ db_user }}',
+        'PASSWORD': '{{ db_pwd }}',
+        'HOST': '{{ db_host }}',
+        'PORT': '{{ db_port }}',
+    }
+}
+ES_URL = ['http://{{ elastic_host }}:9200/']
+
+ALLOWED_HOSTS = ['{{ allowed_long }}','{{ allowed_short}}']
+
+
+EMAIL_HOST = '{{ smtp_host}}'
+EMAIL_PORT = 25
+DEFAULT_FROM_EMAIL = '{{ default_email }}'
+SERVER_EMAIL = '{{ default_email }}'
+
+ADMINS = ( {{ admins }}  )
+USE_PODFILE = {{pod_file}}
+
+TIME_ZONE = '{{ tz }}'
+
+CELERY_TO_ENCODE = True # Active encode
+CELERY_BROKER_URL = "amqp://{{ rabbit_user }}:{{ rabbit_pwd }}@{{ rabbit_host }}/{{ rabbit_queue }}"             # Definit le message broker.
+
+AUTH_TYPE = (('local', _('local')), ('CAS', 'CAS')) 
+USE_CAS = {{ use_cas }}
+CAS_GATEWAY = {{ cas_gateway }}
+POPULATE_USER = '{{ populate }}'
+#CREATE_GROUP_FOM_AFFILIATION = True
+CAS_SERVER_URL = '{{ cas_url }}'
+LDAP_SERVER = {'url': '{{ ldap_serveur }}', 'port': {{ldap_port}}, 'use_ssl': {{ldap_ssl}}}
+AFFILIATION = {{ affiliation }}
+USER_LDAP_MAPPING_ATTRIBUTES = {{ mapping }}
+AUTH_LDAP_USER_SEARCH = ('{{ ldap_user_search }}', "(uid=%(uid)s)")
+AUTH_LDAP_BASE_DN ='{{ base_dn }}' 
+AUTH_LDAP_BIND_DN = '{{ bind_dn }}'
+AUTH_LDAP_BIND_PASSWORD = '{{ bind_pwd }}'
+
+
