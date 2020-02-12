@@ -25,7 +25,7 @@ USE_PODFILE = {{pod_file}}
 TIME_ZONE = '{{ tz }}'
 
 CELERY_TO_ENCODE = True # Active encode
-CELERY_BROKER_URL = "amqp://{{ rabbit_user }}:{{ rabbit_pwd }}@{{ rabbit_host }}/{{ rabbit_queue }}"             # Definit le message broker.
+CELERY_BROKER_URL = "amqp://{{ rabbitmq_user }}:{{ rabbitmq_password }}@{{ rabbit_host }}/{{ rabbit_queue }}"             # Definit le message broker.
 
 AUTH_TYPE = (('local', _('local')), ('CAS', 'CAS')) 
 USE_CAS = {{ use_cas }}

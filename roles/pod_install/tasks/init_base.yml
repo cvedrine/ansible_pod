@@ -1,28 +1,4 @@
 - name: Creation de la base
-  shell: "cd {{ django_path }} ;  find . -path '{{django_path}}/*/migrations/*.py' -not -name '__init__.py' -delete ; find . -path '{{django_path}}/*/migrations/*.pyc' -delete"
-  args:
-    executable: /bin/bash
+  command: "sh create_data_base.sh "
 
-- name: make migration
-  django_manage:
-    command:  makemigrations
-    app_path: "{{ django_path }}"
-    virtualenv: "{{ venv_path }}/{{ venv }}"
 
-- name: migrate
-  django_manage:
-    command:  migrate
-    app_path: "{{ django_path }}"
-    virtualenv: "{{ venv_path }}/{{ venv }}"
-
-- name: loaddata video
-  django_manage:
-    command:  "loaddata {{django_path}}/pod/video/fixtures/initial_data.json"
-    app_path: "{{ django_path }}"
-    virtualenv: "{{ venv_path }}/{{ venv }}"
-
-- name: loaddata main
-  django_manage:
-    command:  "loaddata {{django_path}}/pod/main/fixtures/initial_data.json"
-    app_path: "{{ django_path }}"
-    virtualenv: "{{ venv_path }}/{{ venv }}"

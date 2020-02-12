@@ -2,7 +2,7 @@ all:
   children:
     dbservers:
       hosts:
-        pod.domain.fr:
+        podv2-test-bdd.domain.fr:
       vars:
         postgresql_restarted_state: "restarted"
         postgresql_service_state: started
@@ -16,44 +16,45 @@ all:
           - { type: host, database: all, user: all, address: '127.0.0.1/32', auth_method: md5 }
           - { type: host, database: all, user: all, address: '::1/128', auth_method: md5 }
         postgresql_databases:
-          - name: pod
+          - name: podv2
         postgresql_users:
-          - name: pod
-            db: pod
-            password: pass
-            
-    
+          - name: podv2
+            db: podv2
+            password: "{{ pgsql_db_password }}"
+        pgsql_db_password:
+
+
     elasticsearch:
       hosts:
-        pod.domain.fr:
+        podv2-test-es.domain.fr:
       vars:
         elasticsearch_version: '6.x'
         elasticsearch_service_state: started
         elasticsearch_service_enabled: true
-        elasticsearch_network_host: localhost
+        elasticsearch_network_host: 0.0.0.0
         elasticsearch_http_port: 9200
         elasticsearch_cluster_name: pod-application
         elasticsearch_node_name: pod-1
-        elasticsearch_unicast_hosts: ["127.0.0.1"]
+        elasticsearch_unicast_hosts: ['127.0.0.1','podv2-test-es.domain.fr']
    
     rabbitmq:
       hosts:
-        pod.domain.fr: 
+        podv2-test-rabbitmq.domain.fr:
       vars:
         rabbitmq_daemon: rabbitmq-server
         rabbitmq_state: started
         rabbitmq_enabled: true
         rabbitmq_user: pod
-        rabbitmq_password: pass
+        rabbitmq_password: !vault |
         rabbitmq_vhost: rabbitpod
     
     webservers:
       hosts:
-        pod.domain.fr: 
+        podv2-test-web.domain.fr: 
    
     encodeservers:
       hosts:
-        pod.domain.fr: 
+        podv2-test-enc.domain.fr: 
 
   vars:
     python_version: python3.6
@@ -65,26 +66,26 @@ all:
     logs: /var/log/pod
     pip3: /usr/bin/pip3
     depot: https://github.com/esupportail/podv2.git
-    requirements: /data/django/podv2/requirements.txt
+    requirements: "{{ django_path }}/requirements.txt"
     django_db_backends: django.db.backends.postgresql_psycopg2
-    db_name: pod
-    db_user: pod
-    db_pwd: pass
+    db_name: "{{ hostvars[groups['dbservers'][0]].postgresql_databases[0].name}}"
+    db_user: "{{ hostvars[groups['dbservers'][0]].postgresql_users[0].name}}"
+    db_pwd: "{{ hostvars[groups['dbservers'][0]].postgresql_users[0].password}}"
     db_port: 5432
-    db_host: localhost
+    db_host: "{{ hostvars[groups['dbservers'][0]].inventory_hostname}}" 
     smtp_host: mailhost
-    default_email: noreply@pod.domain.fr
-    elastic_host: pod.domain.fr
-    elastic_ip: '*.*.*.*' 
-    allowed_long: 'pod.domain.fr'
-    allowed_short: 'pod.domain.fr'
-    admins: "('prenom nom', 'prenom.nom@.fr')"
+    default_email: noreply@domain.fr
+    elastic_host: "{{ hostvars[groups['elasticsearch'][0]].inventory_hostname}}"
+    elastic_ip: "{{ hostvars[groups['elasticsearch'][0]].ansible_default_ipv4.address }}" 
+    allowed_long: 'podv2-test.domain.fr'
+    allowed_short: 'podv2-test.domain.fr'
+    admins: "('admin', 'admin@dmain.fr')"
     pod_file: True
     tz: Europe/Paris
-    rabbit_host: '*.*.*.*'
-    rabbit_user: pod
-    rabbit_pwd: pod
-    rabbit_queue: rabbitpod
+    rabbit_host: "{{ hostvars[groups['rabbitmq'][0]].ansible_default_ipv4.address }}" 
+    rabbit_user: "{{ hostvars[groups['rabbitmq'][0]].rabbitmq_user}}"
+    rabbit_pwd: "{{ hostvars[groups['rabbitmq'][0]].rabbitmq_password}}"
+    rabbit_queue: "{{ hostvars[groups['rabbitmq'][0]].rabbitmq_vhost}}"
     use_cas: True
     cas_gateway: True
     populate: LDAP
@@ -94,14 +95,11 @@ all:
     ldap_ssl: True
     affiliation: ( ('student', _('student')), ('faculty', _('faculty')), ('staff', _('staff')), ('employee', _('employee')), ('member', _('member')), ('affiliate', _('affiliate')), ('alum', _('alum')), ('library-walk-in', _('library-walk-in')), ('researcher', _('researcher')), ('retired', _('retired')), ('emeritus', _('emeritus')), ('teacher', _('teacher')), ('registered-reader', _('registered-reader')) )
     mapping: { "uid": "uid", "mail": "mail", "last_name": "sn", "first_name": "givenname", "affiliation": "eduPersonAffiliation" }
-    bind_dn: 'cn=****'
-    bind_pwd: '**********'
-    base_dn: 'ou=****' 
-    ldap_user_search: 'user'
+    bind_dn: 'cn=*,ou=*,ou=*,o=annuaire'
+    bind_pwd:
+    base_dn: 'ou=*,ou=*,o=annuaire' 
+    ldap_user_search: '' 
 
-
-
-          
     
 
     
